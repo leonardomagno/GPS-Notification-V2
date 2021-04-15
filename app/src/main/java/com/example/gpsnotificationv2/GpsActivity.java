@@ -55,11 +55,11 @@ public class GpsActivity extends AppCompatActivity {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        String latitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
-                        String longitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
+                        String userLat = intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
+                        String userLong = intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
 
-                        if (latitude != null && longitude != null) {
-                            mMsgView.setText(getString(R.string.msg_location_service_started) + "\n Latitude : " + latitude + "\n Longitude: " + longitude);
+                        if (userLat != null && userLong != null) {
+                            mMsgView.setText(getString(R.string.msg_location_service_started) + "\n Latitude : " + userLat + "\n Longitude: " + userLong);
                         }
                     }
                 }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
