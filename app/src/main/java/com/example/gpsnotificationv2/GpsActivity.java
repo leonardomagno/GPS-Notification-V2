@@ -6,8 +6,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -15,8 +13,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -44,6 +40,8 @@ public class GpsActivity extends AppCompatActivity {
 
     private boolean mAlreadyStartedService = false;
     private TextView mMsgView;
+    private static Client client;
+    private double distance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,12 +53,22 @@ public class GpsActivity extends AppCompatActivity {
                 new BroadcastReceiver() {
                     @Override
                     public void onReceive(Context context, Intent intent) {
-                        String userLat = intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
-                        String userLong = intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
+                        String Latitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LATITUDE);
+                        String Longitude = intent.getStringExtra(LocationMonitoringService.EXTRA_LONGITUDE);
 
-                        if (userLat != null && userLong != null) {
-                            mMsgView.setText(getString(R.string.msg_location_service_started) + "\n Latitude : " + userLat + "\n Longitude: " + userLong);
+                        if (Latitude != null && Longitude != null) {
+                            mMsgView.setText(getString(R.string.msg_location_service_started) + "\n Latitude : " + Latitude + "\n Longitude: " + Longitude);
                         }
+
+                        double userLatitude = Double.parseDouble(Latitude);
+                        double userLongitude = Double.parseDouble(Longitude);
+
+                        client = new Client(-22.881032471097473, -43.09896348498906);
+                        double clientLatitude = client.getLatitude();
+                        double clientLongitude = client.getLongitude();
+
+                        double currentDistance = calculateDistanceBetweenPoints(userLatitude, userLongitude, clientLatitude, clientLongitude);
+                        setupProximityBehavior(currentDistance);
                     }
                 }, new IntentFilter(LocationMonitoringService.ACTION_LOCATION_BROADCAST)
         );
@@ -284,18 +292,17 @@ public class GpsActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    public double calculateDistanceBetweenPoints(double lat1, double lng1, double lat2, double lng2) {
+    public double calculateDistanceBetweenPoints(double userLat, double userLng, double clientLat, double clientLng) {
 
-        double earthRadius = 6371000; //meters
-        double dLat = Math.toRadians(lat2-lat1);
-        double dLng = Math.toRadians(lng2-lng1);
-        double a = Math.sin(dLat/2) * Math.sin(dLat/2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(dLng/2) * Math.sin(dLng/2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-        float dist = (float) (earthRadius * c);
+        Location currentLocation = new Location("locationA");
+        currentLocation.setLatitude(userLat);
+        currentLocation.setLongitude(userLng);
+        Location destination = new Location("locationB");
+        destination.setLatitude(clientLat);
+        destination.setLongitude(clientLng);
+        double distance = currentLocation.distanceTo(destination);
 
-        return dist;
+        return distance;
     }
 
     public void setupProximityBehavior(Double distance) {
