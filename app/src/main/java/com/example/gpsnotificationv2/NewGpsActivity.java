@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
@@ -23,8 +24,10 @@ public class NewGpsActivity extends AppCompatActivity {
 
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
     protected FusedLocationProviderClient fusedLocationClient;
-
-
+    private Boolean requestingLocationUpdates;
+    private LocationCallback locationCallback;
+    private LocationRequest locationRequest;
+    
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
