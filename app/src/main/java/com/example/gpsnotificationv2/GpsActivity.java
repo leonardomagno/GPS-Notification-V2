@@ -105,10 +105,6 @@ public class GpsActivity extends AppCompatActivity {
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
 
-        if (activeNetworkInfo == null || !activeNetworkInfo.isConnected()) {
-            return false;
-        }
-
         if (dialog != null) {
             dialog.dismiss();
         }
