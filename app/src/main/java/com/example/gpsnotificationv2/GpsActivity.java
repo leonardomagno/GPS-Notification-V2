@@ -41,7 +41,6 @@ public class GpsActivity extends AppCompatActivity {
     private boolean mAlreadyStartedService = false;
     private TextView mMsgView;
     private static Client client;
-    private double distance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -27,26 +27,23 @@ public class MainActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient mFusedLocationClient;
 
-    private double wayLatitude = 0.0, wayLongitude = 0.0;
+    private double userLatitude = 0.0, userLongitude = 0.0;
     private LocationRequest locationRequest;
     private LocationCallback locationCallback;
-    private Button btnLocation;
     private TextView txtLocation;
     private Button btnContinueLocation;
-    private TextView txtContinueLocation;
-    private StringBuilder stringBuilder;
 
     private boolean isContinue = false;
     private boolean isGPS = false;
+
+    private static Client client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        this.txtContinueLocation = (TextView) findViewById(R.id.txtContinueLocation);
         this.btnContinueLocation = (Button) findViewById(R.id.btnContinueLocation);
         this.txtLocation = (TextView) findViewById(R.id.txtLocation);
-        this.btnLocation = (Button) findViewById(R.id.btnLocation);
 
         mFusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
@@ -71,17 +68,17 @@ public class MainActivity extends AppCompatActivity {
                 }
                 for (Location location : locationResult.getLocations()) {
                     if (location != null) {
-                        wayLatitude = location.getLatitude();
-                        wayLongitude = location.getLongitude();
-                        if (!isContinue) {
-                            txtLocation.setText(String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude));
-                        } else {
-                            stringBuilder.append(wayLatitude);
-                            stringBuilder.append("-");
-                            stringBuilder.append(wayLongitude);
-                            stringBuilder.append("\n\n");
-                            txtContinueLocation.setText(stringBuilder.toString());
-                        }
+                        userLatitude = location.getLatitude();
+                        userLongitude = location.getLongitude();
+                        txtLocation.setText(String.format(Locale.US, "%s - %s", userLatitude, userLongitude));
+
+                        client = new Client(-72.881032471097473, -43.09896348498906);
+                        double clientLatitude = client.getLatitude();
+                        double clientLongitude = client.getLongitude();
+
+                        double currentDistance = calculateDistanceBetweenPoints(userLatitude, userLongitude, clientLatitude, clientLongitude);
+                        setupProximityBehavior(currentDistance);
+
                         if (!isContinue && mFusedLocationClient != null) {
                             mFusedLocationClient.removeLocationUpdates(locationCallback);
                         }
@@ -90,23 +87,12 @@ public class MainActivity extends AppCompatActivity {
             }
         };
 
-        btnLocation.setOnClickListener(v -> {
-
-            if (!isGPS) {
-                Toast.makeText(this, "Please turn on GPS", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            isContinue = false;
-            getLocation();
-        });
-
         btnContinueLocation.setOnClickListener(v -> {
             if (!isGPS) {
                 Toast.makeText(this, "Please turn on GPS", Toast.LENGTH_SHORT).show();
                 return;
             }
             isContinue = true;
-            stringBuilder = new StringBuilder();
             getLocation();
         });
     }
@@ -118,19 +104,7 @@ public class MainActivity extends AppCompatActivity {
                     AppConstants.LOCATION_REQUEST);
 
         } else {
-            if (isContinue) {
-                mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-            } else {
-                mFusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, location -> {
-                    if (location != null) {
-                        wayLatitude = location.getLatitude();
-                        wayLongitude = location.getLongitude();
-                        txtLocation.setText(String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude));
-                    } else {
-                        mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
-                    }
-                });
-            }
+            mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
         }
     }
 
@@ -149,9 +123,9 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         mFusedLocationClient.getLastLocation().addOnSuccessListener(MainActivity.this, location -> {
                             if (location != null) {
-                                wayLatitude = location.getLatitude();
-                                wayLongitude = location.getLongitude();
-                                txtLocation.setText(String.format(Locale.US, "%s - %s", wayLatitude, wayLongitude));
+                                userLatitude = location.getLatitude();
+                                userLongitude = location.getLongitude();
+                                txtLocation.setText(String.format(Locale.US, "%s - %s", userLatitude, userLongitude));
                             } else {
                                 mFusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null);
                             }
@@ -172,6 +146,27 @@ public class MainActivity extends AppCompatActivity {
             if (requestCode == AppConstants.GPS_REQUEST) {
                 isGPS = true; // flag maintain before get location
             }
+        }
+    }
+
+    public double calculateDistanceBetweenPoints(double userLat, double userLng, double clientLat, double clientLng) {
+
+        Location currentLocation = new Location("locationA");
+        currentLocation.setLatitude(userLat);
+        currentLocation.setLongitude(userLng);
+        Location destination = new Location("locationB");
+        destination.setLatitude(clientLat);
+        destination.setLongitude(clientLng);
+        double distance = currentLocation.distanceTo(destination);
+
+        return distance;
+    }
+
+    public void setupProximityBehavior(Double distance) {
+        if (distance < 1000){
+            Toast.makeText(getApplicationContext(), "Você está a menos de 1 km de distância", Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "Você está a mais de 1 km de distância", Toast.LENGTH_LONG).show();
         }
     }
 }

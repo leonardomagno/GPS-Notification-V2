@@ -15,17 +15,6 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <Button
-            android:id="@+id/btnLocation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/black"
-            android:paddingEnd="16dp"
-            android:paddingStart="16dp"
-            android:text="One time location"
-            android:textAllCaps="false"
-            android:textColor="#ffffff" />
-
         <TextView
             android:id="@+id/txtLocation"
             android:layout_width="match_parent"
