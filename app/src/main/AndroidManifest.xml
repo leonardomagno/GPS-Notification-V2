@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.GPSNotificationV2">
         <service android:name=".services.LocationMonitoringService"></service>
-        <activity android:name=".GpsActivity">
+        <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
