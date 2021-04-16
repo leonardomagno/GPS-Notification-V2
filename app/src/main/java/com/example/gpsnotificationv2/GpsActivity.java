@@ -1,6 +1,7 @@
 package com.example.gpsnotificationv2;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -16,6 +17,7 @@ import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.util.Log;
@@ -73,6 +75,7 @@ public class GpsActivity extends AppCompatActivity {
         );
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.P)
     @Override
     public void onResume() {
         super.onResume();
@@ -83,6 +86,7 @@ public class GpsActivity extends AppCompatActivity {
     /**
      * Step 1: Check Google Play services
      */
+    @RequiresApi(api = Build.VERSION_CODES.P)
     private void startStep1() {
 
         //Check whether this user has installed Google play service which is being used by Location updates.
@@ -99,6 +103,7 @@ public class GpsActivity extends AppCompatActivity {
     /**
      * Step 2: Check & Prompt Internet connection
      */
+    @RequiresApi(api = Build.VERSION_CODES.P)
     private Boolean startStep2(DialogInterface dialog) {
         ConnectivityManager connectivityManager
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -161,6 +166,7 @@ public class GpsActivity extends AppCompatActivity {
     /**
      * Return the current state of the permissions needed.
      */
+    @RequiresApi(api = Build.VERSION_CODES.P)
     private boolean checkPermissions() {
         int permissionState1 = ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.ACCESS_FINE_LOCATION);
@@ -168,13 +174,17 @@ public class GpsActivity extends AppCompatActivity {
         int permissionState2 = ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION);
 
-        return permissionState1 == PackageManager.PERMISSION_GRANTED && permissionState2 == PackageManager.PERMISSION_GRANTED;
+        int permissionState3 = ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.FOREGROUND_SERVICE);
+
+        return permissionState1 == PackageManager.PERMISSION_GRANTED && permissionState2 == PackageManager.PERMISSION_GRANTED && permissionState3 == PackageManager.PERMISSION_GRANTED;
 
     }
 
     /**
      * Start permissions requests.
      */
+    @RequiresApi(api = Build.VERSION_CODES.P)
     private void requestPermissions() {
 
         boolean shouldProvideRationale =
@@ -185,18 +195,23 @@ public class GpsActivity extends AppCompatActivity {
                 ActivityCompat.shouldShowRequestPermissionRationale(this,
                         Manifest.permission.ACCESS_COARSE_LOCATION);
 
+        boolean shouldProvideRationale3 =
+                ActivityCompat.shouldShowRequestPermissionRationale(this,
+                        Manifest.permission.FOREGROUND_SERVICE);
+
 
         // Provide an additional rationale to the img_user. This would happen if the img_user denied the
         // request previously, but didn't check the "Don't ask again" checkbox.
-        if (shouldProvideRationale || shouldProvideRationale2) {
+        if (shouldProvideRationale || shouldProvideRationale2 || shouldProvideRationale3) {
             Log.i(TAG, "Displaying permission rationale to provide additional context.");
             showSnackbar(R.string.permission_rationale,
                     android.R.string.ok, new View.OnClickListener() {
+                        @RequiresApi(api = Build.VERSION_CODES.P)
                         @Override
                         public void onClick(View view) {
                             // Request permission
                             ActivityCompat.requestPermissions(GpsActivity.this,
-                                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.FOREGROUND_SERVICE},
                                     REQUEST_PERMISSIONS_REQUEST_CODE);
                         }
                     });
@@ -206,7 +221,7 @@ public class GpsActivity extends AppCompatActivity {
             // sets the permission in a given state or the img_user denied the permission
             // previously and checked "Never ask again".
             ActivityCompat.requestPermissions(GpsActivity.this,
-                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.FOREGROUND_SERVICE},
                     REQUEST_PERMISSIONS_REQUEST_CODE);
         }
     }
@@ -301,7 +316,7 @@ public class GpsActivity extends AppCompatActivity {
     }
 
     public void setupProximityBehavior(Double distance) {
-        if (distance < 1000){
+        if (distance < 1000) {
             Toast.makeText(getApplicationContext(), "Você está a menos de 1 km de distância", Toast.LENGTH_LONG).show();
         } else {
             Toast.makeText(getApplicationContext(), "Você está a mais de 1 km de distância", Toast.LENGTH_LONG).show();
