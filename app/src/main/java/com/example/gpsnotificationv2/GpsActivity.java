@@ -4,9 +4,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 import android.Manifest;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -14,6 +20,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.media.RingtoneManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -317,9 +324,36 @@ public class GpsActivity extends AppCompatActivity {
 
     public void setupProximityBehavior(Double distance) {
         if (distance < 1000) {
-            Toast.makeText(getApplicationContext(), "Você está a menos de 1 km de distância", Toast.LENGTH_LONG).show();
-        } else {
-            Toast.makeText(getApplicationContext(), "Você está a mais de 1 km de distância", Toast.LENGTH_LONG).show();
+            buildNotification();
         }
+    }
+
+    public void buildNotification() {
+        Intent intent = new Intent(this, GpsActivity.class);
+        PendingIntent contentIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
+
+        String CHANNEL_ID = "channel_location";
+        String CHANNEL_NAME = "channel_location";
+
+        NotificationCompat.Builder builder = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, CHANNEL_NAME, NotificationManager.IMPORTANCE_DEFAULT);
+            channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+            builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID);
+            builder.setChannelId(CHANNEL_ID);
+            builder.setBadgeIconType(NotificationCompat.BADGE_ICON_NONE);
+        } else {
+            builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID);
+        }
+        builder.setAutoCancel(true);
+        builder.setSmallIcon(R.drawable.ic_launcher_foreground);
+        builder.setContentTitle(getText(R.string.notification_tittle));
+        builder.setContentText(getText(R.string.notification_text));
+        builder.setContentIntent(contentIntent);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(GpsActivity.this);
+        notificationManager.notify(1, builder.build());
     }
 }

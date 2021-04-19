@@ -9,4 +9,11 @@
     <string name="msg_location_service_not_started">Location Tracking Not Started</string>
     <string name="msg_location_service_started">Location Tracking Started</string>
     <string name="btn_label_refresh">Refresh</string>
+
+    //Notificação
+    <string name="notification_ticker">GPS Tracking</string>
+    <string name="notification_tittle">Distância</string>
+    <string name="notification_text">Você está a menos de 1 km de distância</string>
+
+
 </resources>
